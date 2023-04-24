@@ -25,15 +25,18 @@ void interactive_shell(void)
 /**
  * execute_cmd - execute the command
  * @cmd: command
+ * @env: array of pointers to the environment parameters
  *
  * Description: execute the command
  * Return: On success, no return, on erro, return -1
  **/
-int execute_cmd(char *cmd)
+int execute_cmd(char *cmd, char **envp)
 { 
-	char *user_input[] = {cmd, NULL};
+	char *user_input[3];
 
-	if (execve(user_input[0], user_input, NULL) == -1)
+	user_input[0] = cmd;
+
+	if (execve(user_input[0], user_input, envp) == -1)
 	{
 		perror("Error: ");
 		return (-1);
@@ -43,12 +46,13 @@ int execute_cmd(char *cmd)
 }
 
 
+
 /**
  * main - fork example
  *
  * Return: Always 0.
  */
-int main(void)
+int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv, char **env)
 {
 	char *buf;
 	size_t bufsize;
@@ -66,7 +70,6 @@ int main(void)
 		getline_return = getline(&buf, &bufsize, stdin);
 		if (getline_return == EOF)
 		{
-			printf("fail to get the input\n");
 			free(buf);
 			return (1);
 		}
@@ -81,7 +84,7 @@ int main(void)
 
 		if (pid == 0)
 		{
-			execute_cmd(buf);
+			execute_cmd(buf, env);
 		}
 		else
 		{
