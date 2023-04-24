@@ -25,18 +25,19 @@ void interactive_shell(void)
 /**
  * execute_cmd - execute the command
  * @cmd: command
- * @env: array of pointers to the environment parameters
  *
  * Description: execute the command
  * Return: On success, no return, on erro, return -1
  **/
-int execute_cmd(char *cmd, char **envp)
+int execute_cmd(char *cmd)
 { 
-	char *user_input[3];
+	char *user_input[2];
+	extern char **environ;
 
 	user_input[0] = cmd;
+	user_input[1] = NULL;
 
-	if (execve(user_input[0], user_input, envp) == -1)
+	if (execve(user_input[0], user_input, environ) == -1)
 	{
 		perror("Error: ");
 		return (-1);
@@ -52,7 +53,7 @@ int execute_cmd(char *cmd, char **envp)
  *
  * Return: Always 0.
  */
-int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv, char **env)
+int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv)
 {
 	char *buf;
 	size_t bufsize;
@@ -71,7 +72,7 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 		if (getline_return == EOF)
 		{
 			free(buf);
-			return (1);
+			return (0);
 		}
 		buf = strtok(buf, "\n");
 
@@ -79,12 +80,12 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 		if (pid == -1)
 		{
 			perror("Error: ");
-			return (1);
+			return (0);
 		}
 
 		if (pid == 0)
 		{
-			execute_cmd(buf, env);
+			execute_cmd(buf);
 		}
 		else
 		{
