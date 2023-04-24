@@ -47,6 +47,93 @@ int execute_cmd(char *cmd)
 }
 
 
+/**
+ * user_getline - get the user input
+ *
+ * Description: get the user input
+ * Return: On success return the buf, on error return NULL
+ **/
+char * user_getline(void)
+{
+	char *buf;
+	size_t bufsize;
+	ssize_t getline_return;
+
+	buf = NULL;
+	bufsize = 0;
+
+	getline_return = getline(&buf, &bufsize, stdin);
+	if (getline_return == EOF)
+	{
+		free(buf);
+		return (NULL);
+	}
+	return (buf);
+}
+
+/**
+ * count_token - counting the number of strings that have been split
+ * @str: user input string
+ * @delim: delimiter
+ *
+ * Description: counting the number of strings that have been split
+ * Return: the number of strings
+ **/
+int count_token(char *str, char *delim )
+{
+	char *tokenized_str;
+	char *token;
+	int i;
+
+	tokenized_str = strdup(str);
+
+	i = 0;
+	token = strtok(tokenized_str, delim);
+	while (token != NULL)
+	{
+		token = strtok(NULL, delim);
+		i = i + 1;
+	}
+	
+	return (i);
+}
+
+
+/**
+ * trim_user_input - remove delimiters from the input
+ * @str: user input
+ *
+ * Description - remove delimiters from the input
+ * Return: trimed user input
+ **/
+char **trim_user_input(char *str, char *delim)
+{
+	char **token_array;
+	int num_token;
+	int i;
+	char *token;
+
+	num_token = count_token(str, delim);
+
+	token_array = malloc(sizeof(*token_array) * num_token);
+	if (token_array == NULL)
+	{
+		return (NULL);
+	}
+	
+	i = 0;
+	token = strtok(str, delim);
+	while (token != NULL)
+	{
+		token_array[i] = token;
+		token = strtok(NULL, delim);
+		i = i + 1;
+	}
+
+	return (token_array);
+}
+
+
 
 /**
  * main - fork example
@@ -56,25 +143,22 @@ int execute_cmd(char *cmd)
 int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv)
 {
 	char *buf;
-	size_t bufsize;
-	ssize_t getline_return;
 	pid_t pid;
 	int status;
-
-	buf = NULL;
-	bufsize = 0;
+	char **cmd_array;
 	
 	while (1)
 	{
 		interactive_shell();
 
-		getline_return = getline(&buf, &bufsize, stdin);
-		if (getline_return == EOF)
+		buf = user_getline();
+		if (buf == NULL)
 		{
-			free(buf);
 			return (0);
 		}
-		buf = strtok(buf, "\n");
+
+		cmd_array = trim_user_input(buf, "\n");
+
 
 		pid = fork();
 		if (pid == -1)
@@ -85,7 +169,7 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 
 		if (pid == 0)
 		{
-			execute_cmd(buf);
+			execute_cmd(cmd_array[0]);
 		}
 		else
 		{
