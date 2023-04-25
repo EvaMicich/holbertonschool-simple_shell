@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <ctype.h>
 
 /**
  * interactive_shell - check if it an interactive or not
@@ -71,70 +72,40 @@ char * user_getline(void)
 	return (buf);
 }
 
-/**
- * count_token - counting the number of strings that have been split
- * @str: user input string
- * @delim: delimiter
- *
- * Description: counting the number of strings that have been split
- * Return: the number of strings
- **/
-int count_token(char *str, char *delim )
+char *trim(char *str)
 {
-	char *tokenized_str;
-	char *token;
-	int i;
+    size_t len = 0;
+    char *frontp = str;
+    char *endp = NULL;
 
-	tokenized_str = strdup(str);
+    if( str == NULL ) { return NULL; }
+    if( str[0] == '\0' ) { return str; }
 
-	i = 0;
-	token = strtok(tokenized_str, delim);
-	while (token != NULL)
-	{
-		token = strtok(NULL, delim);
-		i = i + 1;
-	}
+    len = strlen(str);
+    endp = str + len;
 
-	free(tokenized_str);	
-	return (i);
+
+    while( isspace((unsigned char) *frontp) ) { ++frontp; }
+    if( endp != frontp )
+    {
+        while( isspace((unsigned char) *(--endp)) && endp != frontp ) {}
+    }
+
+    if( frontp != str && endp == frontp )
+            *str = '\0';
+    else if( str + len - 1 != endp )
+            *(endp + 1) = '\0';
+
+
+    endp = str;
+    if( frontp != str )
+    {
+            while( *frontp ) { *endp++ = *frontp++; }
+            *endp = '\0';
+    }
+
+    return str;
 }
-
-
-/**
- * trim_user_input - remove delimiters from the input
- * @str: user input
- *
- * Description - remove delimiters from the input
- * Return: trimed user input
- **/
-char **trim_user_input(char *str, char *delim)
-{
-	char **token_array;
-	int num_token;
-	int i;
-	char *token;
-
-	num_token = count_token(str, delim);
-
-	token_array = malloc(sizeof(*token_array) * num_token);
-	if (token_array == NULL)
-	{
-		free(token_array);
-		return (NULL);
-	}
-	
-	i = 0;
-	token = strtok(str, delim);
-	while (token != NULL)
-	{
-		token_array[i] = token;
-		token = strtok(NULL, delim);
-		i = i + 1;
-	}
-
-	return (token_array);
-}
-
 
 
 /**
@@ -142,14 +113,13 @@ char **trim_user_input(char *str, char *delim)
  *
  * Return: Always 0.
  */
-int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv)
+int main(void)
 {
 	char *buf;
 	pid_t pid;
 	int status;
 	char **cmd_array;
-	int i;
-	int num_token;
+	char *trimed_buf;
 	
 	while (1)
 	{
@@ -161,13 +131,7 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 			return (0);
 		}
 
-		cmd_array = trim_user_input(buf, " \t\n");
-		if (cmd_array == NULL)
-		{
-			return (0);
-		}
-
-		num_token = count_token(buf, " \t\n");
+		
 
 		pid = fork();
 		if (pid == -1)
@@ -178,22 +142,15 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 
 		if (pid == 0)
 		{
-			execute_cmd(cmd_array[0]);
+			trimed_buf = trim(buf);
+			execute_cmd(trimed_buf);
 		}
 		else
 		{
 			wait(&status);
-			i = 0;
-			while (i < num_token)
-			{
-				free(cmd_array[i]);
-				i = i + 1;
-			}
-			free(cmd_array);
 		}
 	}
 
 	free(buf);
-	fclose(stdin);
 	return (0);
 }
