@@ -30,17 +30,12 @@ void interactive_shell(void)
  * Description: execute the command
  * Return: On success, no return, on erro, return -1
  **/
-int execute_cmd(char *cmd)
+int execute_cmd(char **cmd_arr)
 { 
-	char *user_input[2];
 	extern char **environ;
 
-	user_input[0] = cmd;
-	user_input[1] = NULL;
-
-	if (execve(user_input[0], user_input, environ) == -1)
+	if (execve(cmd_arr[0], cmd_arr, environ) == -1)
 	{
-		perror("Error: ");
 		return (-1);
 	}
 
@@ -103,6 +98,62 @@ char *trim_whitespace(char *str)
 	return (str);
 }
 
+int count_token(char *str, char *delim )
+{
+	char *tokenized_str;
+	char *token;
+	int i;
+
+	tokenized_str = strdup(str);
+
+	i = 0;
+	token = strtok(tokenized_str, delim);
+	while (token != NULL)
+	{
+		token = strtok(NULL, delim);
+		i = i + 1;
+	}
+
+	free(tokenized_str);	
+	return (i);
+}
+
+/**
+ * get_input_arr - split the user input and make an array of strings
+ * @str: user input
+ * @delim: the delimiter
+ *
+ * Description - split the user input and make an array of strings
+ * Return: an array of tokens
+ **/
+char **get_input_arr(char *str, char *delim)
+{
+	char **token_arr;
+	int num_token;
+	int i;
+	char *token;
+
+	num_token = count_token(str, delim);
+
+	token_arr = malloc(sizeof(*token_arr) * num_token);
+	if (token_arr == NULL)
+	{
+		free(token_arr);
+		return (NULL);
+	}
+	
+	i = 0;
+	token = strtok(str, delim);
+	while (token != NULL)
+	{
+		token_arr[i] = token;
+		token = strtok(NULL, delim);
+		i = i + 1;
+	}
+	token_arr[i + 1] = NULL;
+
+	return (token_arr);
+}
 
 /**
  * main - entry point
@@ -115,7 +166,8 @@ int main(void)
 	pid_t pid;
 	int status;
 	char *trimed_buf;
-
+	char **cmd_arr;
+	int i;
 	
 	while (1)
 	{
@@ -137,8 +189,16 @@ int main(void)
 		if (pid == 0)
 		{
 			trimed_buf = trim_whitespace(buf);
-			execute_cmd(trimed_buf);
+			cmd_arr = get_input_arr(trimed_buf, " ");
+			execute_cmd(cmd_arr);
 			free(trimed_buf);
+			i = 0;
+			while (cmd_arr[i] != NULL)
+			{
+				free(cmd_arr[i]);
+				i = i + 1;
+			}
+			free(cmd_arr);
 		}
 		else
 		{
