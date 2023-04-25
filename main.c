@@ -33,6 +33,10 @@ void interactive_shell(void)
 int execute_cmd(char **cmd_arr)
 { 
 	extern char **environ;
+	if (cmd_arr == NULL || cmd_arr[0] == NULL)
+	{
+		return (-1);
+	}
 
 	if (execve(cmd_arr[0], cmd_arr, environ) == -1)
 	{
@@ -190,7 +194,6 @@ int main(void)
 			trimed_buf = trim_whitespace(buf);
 			cmd_arr = get_input_arr(trimed_buf, " ");
 			execute_cmd(cmd_arr);
-			free(trimed_buf);
 			free(cmd_arr);
 		}
 		else
