@@ -135,7 +135,7 @@ char **get_input_arr(char *str, char *delim)
 
 	num_token = count_token(str, delim);
 
-	token_arr = malloc(sizeof(*token_arr) * num_token);
+	token_arr = malloc(sizeof(*token_arr) * (num_token + 1));
 	if (token_arr == NULL)
 	{
 		free(token_arr);
@@ -150,7 +150,7 @@ char **get_input_arr(char *str, char *delim)
 		token = strtok(NULL, delim);
 		i = i + 1;
 	}
-	token_arr[i + 1] = NULL;
+	token_arr[i] = NULL;
 
 	return (token_arr);
 }
@@ -167,7 +167,6 @@ int main(void)
 	int status;
 	char *trimed_buf;
 	char **cmd_arr;
-	int i;
 	
 	while (1)
 	{
@@ -192,12 +191,6 @@ int main(void)
 			cmd_arr = get_input_arr(trimed_buf, " ");
 			execute_cmd(cmd_arr);
 			free(trimed_buf);
-			i = 0;
-			while (cmd_arr[i] != NULL)
-			{
-				free(cmd_arr[i]);
-				i = i + 1;
-			}
 			free(cmd_arr);
 		}
 		else
