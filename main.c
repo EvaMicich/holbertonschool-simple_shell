@@ -43,6 +43,7 @@ int execute_cmd(char **cmd_arr)
 		return (-1);
 	}
 
+	free(cmd_arr);
 	return (0);
 }
 
@@ -160,6 +161,68 @@ char **get_input_arr(char *str, char *delim)
 }
 
 /**
+ * find_path - find the full path of a command
+ * @cmd: the command that need to be searched
+ *
+ * Description - find the full path of a command
+ * Return: on success, return command, on failure, return NULL
+ **/
+char *find_path(char* cmd)
+{
+  to do
+}
+
+/**
+ * create_child - fork a child process and execute program
+ * @cmd_arr: an array of commands
+ *
+ * Description - fork a child process and execute program
+ * Return: nothing
+ **/
+void create_child(char **cmd_arr)
+{
+	pid_t pid;
+	int status;
+	int is_exist;
+	struct stat st;
+	char *cmd_tmp;
+	char *cmd;
+
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("Error: ");
+		return;
+	}
+
+	if (pid == 0)
+	{
+		is_exist = stat(cmd_arr[0], &st);
+		if (is_exist == 0)
+            {
+                execute_cmd(cmd_arr);
+            }
+            else
+            {
+                cmd = find_path(cmd_arr[0]);
+                if (cmd == NULL)
+                {
+                    printf("error message");
+                    return;
+                }
+                cmd_arr[0] = cmd;
+                execute_cmd(cmd_arr);
+            }
+		}
+		else
+		{
+			wait(&status);
+		}
+}	
+
+
+
+/**
  * main - entry point
  *
  * Return: Always 0.
@@ -167,8 +230,6 @@ char **get_input_arr(char *str, char *delim)
 int main(void)
 {
 	char *buf;
-	pid_t pid;
-	int status;
 	char *trimed_buf;
 	char **cmd_arr;
 	
@@ -182,24 +243,10 @@ int main(void)
 			return (0);
 		}
 
-		pid = fork();
-		if (pid == -1)
-		{
-			perror("Error: ");
-			return (0);
-		}
+		trimed_buf = trim_whitespace(buf);
+		cmd_arr = get_input_arr(trimed_buf, " ");
+		create_child(cmd_arr);
 
-		if (pid == 0)
-		{
-			trimed_buf = trim_whitespace(buf);
-			cmd_arr = get_input_arr(trimed_buf, " ");
-			execute_cmd(cmd_arr);
-			free(cmd_arr);
-		}
-		else
-		{
-			wait(&status);
-		}
 		free(buf);
 	}
 
