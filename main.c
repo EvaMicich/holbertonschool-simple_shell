@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <ctype.h>
 
 /**
  * interactive_shell - check if it an interactive or not
@@ -72,84 +73,49 @@ char * user_getline(void)
 }
 
 /**
- * count_token - counting the number of strings that have been split
- * @str: user input string
- * @delim: delimiter
- *
- * Description: counting the number of strings that have been split
- * Return: the number of strings
- **/
-int count_token(char *str, char *delim )
-{
-	char *tokenized_str;
-	char *token;
-	int i;
-
-	tokenized_str = strdup(str);
-
-	i = 0;
-	token = strtok(tokenized_str, delim);
-	while (token != NULL)
-	{
-		token = strtok(NULL, delim);
-		i = i + 1;
-	}
-
-	free(tokenized_str);	
-	return (i);
-}
-
-
-/**
- * trim_user_input - remove delimiters from the input
+ * trim_whitespace - remove delimiters from the input
  * @str: user input
  *
  * Description - remove delimiters from the input
  * Return: trimed user input
  **/
-char **trim_user_input(char *str, char *delim)
+char *trim_whitespace(char *str)
 {
-	char **token_array;
-	int num_token;
-	int i;
-	char *token;
+	char *endp;
 
-	num_token = count_token(str, delim);
-
-	token_array = malloc(sizeof(*token_array) * num_token);
-	if (token_array == NULL)
+	while (isspace((unsigned char) *str) != 0)
 	{
-		free(token_array);
-		return (NULL);
-	}
-	
-	i = 0;
-	token = strtok(str, delim);
-	while (token != NULL)
-	{
-		token_array[i] = token;
-		token = strtok(NULL, delim);
-		i = i + 1;
+		str = str + 1;
 	}
 
-	return (token_array);
+	if (*str == '\0')
+	{
+		return (str);
+	}
+
+	endp = str + strlen(str) -1;
+	while (endp > str && (isspace((unsigned char) *endp) != 0))
+	{
+		endp = endp - 1;
+	}
+	endp[1] = '\0';
+
+	return (str);
 }
 
 
-
 /**
- * main - fork example
+ * main - entry point
  *
  * Return: Always 0.
  */
-int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv)
+int main(void)
 {
 	char *buf;
 	pid_t pid;
 	int status;
-	char **cmd_array;
-	int i;
-	int num_token;
+	char *trimed_buf;
+
 	
 	while (1)
 	{
@@ -161,14 +127,6 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 			return (0);
 		}
 
-		cmd_array = trim_user_input(buf, " \t\n");
-		if (cmd_array == NULL)
-		{
-			return (0);
-		}
-
-		num_token = count_token(buf, " \t\n");
-
 		pid = fork();
 		if (pid == -1)
 		{
@@ -178,22 +136,16 @@ int main(__attribute__ ((unused)) int argc, __attribute__ ((unused)) char **argv
 
 		if (pid == 0)
 		{
-			execute_cmd(cmd_array[0]);
+			trimed_buf = trim_whitespace(buf);
+			execute_cmd(trimed_buf);
 		}
 		else
 		{
 			wait(&status);
-			i = 0;
-			while (i < num_token)
-			{
-				free(cmd_array[i]);
-				i = i + 1;
-			}
-			free(cmd_array);
+
 		}
 	}
 
 	free(buf);
-	fclose(stdin);
 	return (0);
 }
