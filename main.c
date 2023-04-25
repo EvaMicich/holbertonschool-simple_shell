@@ -54,7 +54,7 @@ int execute_cmd(char *cmd)
  * Description: get the user input
  * Return: On success return the buf, on error return NULL
  **/
-char * user_getline(void)
+char *user_getline(void)
 {
 	char *buf;
 	size_t bufsize;
@@ -83,7 +83,7 @@ char *trim_whitespace(char *str)
 {
 	char *endp;
 
-	while (isspace((unsigned char) *str) != 0)
+	while (isspace((char) *str) != 0)
 	{
 		str = str + 1;
 	}
@@ -94,7 +94,7 @@ char *trim_whitespace(char *str)
 	}
 
 	endp = str + strlen(str) -1;
-	while (endp > str && (isspace((unsigned char) *endp) != 0))
+	while (endp > str && (isspace((char) *endp) != 0))
 	{
 		endp = endp - 1;
 	}
@@ -138,14 +138,14 @@ int main(void)
 		{
 			trimed_buf = trim_whitespace(buf);
 			execute_cmd(trimed_buf);
+			free(trimed_buf);
 		}
 		else
 		{
 			wait(&status);
-
 		}
+		free(buf);
 	}
 
-	free(buf);
 	return (0);
 }
