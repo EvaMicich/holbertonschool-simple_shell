@@ -242,6 +242,33 @@ char *find_path(char* cmd)
 	return (NULL);
 }
 
+char **check_cmd_arr(char **cmd_arr)
+{
+	int exist_in_current;
+	struct stat st;
+	char *path_cmd;
+
+	if (cmd_arr[0] == NULL)
+	{
+		return(NULL);
+	}
+	exist_in_current = stat(cmd_arr[0], &st);
+	if (exist_in_current == 0)
+	{
+		return(cmd_arr);
+	}
+	else
+	{
+		path_cmd = find_path(cmd_arr[0]);
+		if (path_cmd == NULL)
+		{
+			return(NULL);
+		}
+		cmd_arr[0] = path_cmd;
+		return(cmd_arr);
+	}
+}
+
 /**
  * create_child - fork a child process and execute program
  * @cmd_arr: an array of commands
@@ -253,10 +280,7 @@ void create_child(char **cmd_arr)
 {
 	pid_t pid;
 	int status;
-	int is_exist;
-	struct stat st;
-	char *path_cmd;
-	
+
 	pid = fork();
 	if (pid == -1)
 	{
@@ -266,25 +290,7 @@ void create_child(char **cmd_arr)
 
 	if (pid == 0)
 	{
-		if (cmd_arr[0] == NULL)
-		{
-			return;
-		}
-		is_exist = stat(cmd_arr[0], &st);
-		if (is_exist == 0)
-		{
-			execute_cmd(cmd_arr);
-		}
-		else
-		{
-			path_cmd = find_path(cmd_arr[0]);
-			if (path_cmd == NULL)
-			{
-				return;
-			}
-			cmd_arr[0] = path_cmd;
-			execute_cmd(cmd_arr);
-		}
+		execute_cmd(cmd_arr);
 	}
 	else
 	{
@@ -332,8 +338,11 @@ int main(void)
 
 		trimed_buf = trim_whitespace(buf);
 		cmd_arr = string_to_arr(trimed_buf, " ", NULL, 0);
-		create_child(cmd_arr);
-
+		cmd_arr = check_cmd_arr(cmd_arr);
+		if (cmd_arr != NULL)
+		{
+			create_child(cmd_arr);
+		}
 		free_arr(cmd_arr);
 		free(buf);
 	}
