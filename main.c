@@ -292,6 +292,21 @@ void create_child(char **cmd_arr)
 	}
 }
 
+/**
+ *
+ *
+ */
+void free_arr(char **arr)
+{
+    int i;
+
+    for (i = 0; arr[i] != NULL; i++)
+    {
+        free(arr[i]);
+    }
+
+    free(arr);
+}
 
 
 /**
@@ -319,6 +334,7 @@ int main(void)
 		cmd_arr = string_to_arr(trimed_buf, " ", NULL, 0);
 		create_child(cmd_arr);
 
+		free_arr(cmd_arr);
 		free(buf);
 	}
 
