@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -31,7 +32,7 @@ void interactive_shell(void)
  * Return: On success, no return, on erro, return -1
  **/
 int execute_cmd(char **cmd_arr)
-{ 
+{
 	extern char **environ;
 	if (cmd_arr == NULL || cmd_arr[0] == NULL)
 	{
@@ -119,25 +120,28 @@ int count_token(char *str, char *delim )
 		i = i + 1;
 	}
 
-	free(tokenized_str);	
+	free(tokenized_str);
 	return (i);
 }
 
 /**
- * get_input_arr - split the user input and make an array of strings
+ * string_to_arr - split the user input and make an array of strings, 
+ * optional string concat
  * @str: user input
  * @delim: the delimiter
- *
+ * @cmd: command to concat onto each element
+ * @switch_on_path: 1 turns on command string concat. 0 turns concat off
  * Description - split the user input and make an array of strings
  * Return: an array of tokens
  **/
-char **get_input_arr(char *str, char *delim)
+char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 {
 	char **token_arr;
 	int num_token;
 	int i;
 	char *token;
-
+	char *path_cmd;
+	
 	num_token = count_token(str, delim);
 
 	token_arr = malloc(sizeof(*token_arr) * (num_token + 1));
@@ -146,18 +150,68 @@ char **get_input_arr(char *str, char *delim)
 		free(token_arr);
 		return (NULL);
 	}
-	
-	i = 0;
-	token = strtok(str, delim);
-	while (token != NULL)
+	if (switch_on_path == 0)
 	{
-		token_arr[i] = token;
-		token = strtok(NULL, delim);
-		i = i + 1;
+		i = 0;
+		token = strtok(str, delim);
+		while (token != NULL)
+		{
+			token_arr[i] = token;
+			token = strtok(NULL, delim);
+			i = i + 1;
+		}
+		token_arr[i] = NULL;
 	}
-	token_arr[i] = NULL;
+	else if (switch_on_path == 1)
+	{
+		if (cmd == NULL)
+		{
+			return(NULL);
+		}
+		i = 0;
+		token = strtok(str, delim);
+		while (token != NULL)
+		{
+			path_cmd = malloc(sizeof(*path_cmd) * (strlen(token) + strlen(cmd) + 2));
+			if (path_cmd == NULL)
+			{
+				free(path_cmd);
+				return (NULL);
+			}
+			path_cmd[0] = '\0';
+			path_cmd = strcat(path_cmd, token);
+			path_cmd = strcat(path_cmd, "/");
+			path_cmd = strcat(path_cmd, cmd);
+
+			token_arr[i] = path_cmd;
+			token = strtok(NULL, delim);
+			i = i + 1;
+		}
+		token_arr[i] = NULL;
+	}
 
 	return (token_arr);
+}
+
+char *_getenv(const char *name)
+{
+	extern char **environ;
+	int i;
+	char *token;
+
+	i = 0;
+	while (environ[i] != NULL)
+	{
+		token = strtok(environ[i], "=");
+		if (strcmp(token, name) == 0)
+		{
+			token = strtok(NULL, "=");
+			return (token);
+		}
+		i = i + 1;
+	}
+
+	return (NULL);
 }
 
 /**
@@ -169,7 +223,24 @@ char **get_input_arr(char *str, char *delim)
  **/
 char *find_path(char* cmd)
 {
-  to do
+	char *path;
+	char *token;
+	char **path_arr;
+	int i;
+	struct stat st;
+	
+	path = _getenv("PATH");
+	path_arr = string_to_arr(path, ":", cmd, 1);
+	i = 0;
+	while (path_arr[i] != NULL)
+	{
+		if (stat(path_arr[i], &st) == 0)
+		{
+			return (path_arr[i]);
+		}
+		i = i + 1;
+	}
+	return (NULL);
 }
 
 /**
@@ -187,7 +258,8 @@ void create_child(char **cmd_arr)
 	struct stat st;
 	char *cmd_tmp;
 	char *cmd;
-
+	char *path_cmd;
+	
 	pid = fork();
 	if (pid == -1)
 	{
@@ -197,28 +269,31 @@ void create_child(char **cmd_arr)
 
 	if (pid == 0)
 	{
+		if (cmd_arr[0] == NULL)
+		{
+			return;
+		}
 		is_exist = stat(cmd_arr[0], &st);
 		if (is_exist == 0)
-            {
-                execute_cmd(cmd_arr);
-            }
-            else
-            {
-                cmd = find_path(cmd_arr[0]);
-                if (cmd == NULL)
-                {
-                    printf("error message");
-                    return;
-                }
-                cmd_arr[0] = cmd;
-                execute_cmd(cmd_arr);
-            }
+		{
+			execute_cmd(cmd_arr);
 		}
 		else
 		{
-			wait(&status);
+			path_cmd = find_path(cmd_arr[0]);
+			if (path_cmd == NULL)
+			{
+				return;
+			}
+			cmd_arr[0] = path_cmd;
+			execute_cmd(cmd_arr);
 		}
-}	
+	}
+	else
+	{
+		wait(&status);
+	}
+}
 
 
 
@@ -232,7 +307,7 @@ int main(void)
 	char *buf;
 	char *trimed_buf;
 	char **cmd_arr;
-	
+
 	while (1)
 	{
 		interactive_shell();
@@ -244,7 +319,7 @@ int main(void)
 		}
 
 		trimed_buf = trim_whitespace(buf);
-		cmd_arr = get_input_arr(trimed_buf, " ");
+		cmd_arr = string_to_arr(trimed_buf, " ", NULL, 0);
 		create_child(cmd_arr);
 
 		free(buf);
