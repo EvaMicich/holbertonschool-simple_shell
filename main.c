@@ -141,7 +141,7 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 	int i;
 	char *token;
 	char *path_cmd;
-	
+
 	num_token = count_token(str, delim);
 
 	token_arr = malloc(sizeof(*token_arr) * (num_token + 1));
@@ -224,11 +224,10 @@ char *_getenv(const char *name)
 char *find_path(char* cmd)
 {
 	char *path;
-	char *token;
 	char **path_arr;
 	int i;
 	struct stat st;
-	
+
 	path = _getenv("PATH");
 	path_arr = string_to_arr(path, ":", cmd, 1);
 	i = 0;
@@ -256,8 +255,6 @@ void create_child(char **cmd_arr)
 	int status;
 	int is_exist;
 	struct stat st;
-	char *cmd_tmp;
-	char *cmd;
 	char *path_cmd;
 	
 	pid = fork();
