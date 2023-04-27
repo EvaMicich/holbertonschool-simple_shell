@@ -1,3 +1,4 @@
+#include "lists.h"
 #include <sys/stat.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -6,6 +7,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <ctype.h>
+
 /**
  *
  *
@@ -143,14 +145,33 @@ void *xmalloc(size_t size)
 	void *ptr;
 
 	ptr = malloc(size);
-	printf("malloc return is : %p/n", ptr);
+	printf("malloc return is : %p\n", ptr);
 	return (ptr);
 }
 void xfree(void *ptr)
 {
-	printf("free address: %p", ptr);
+	printf("free address: %p\n", ptr);
 	free(ptr);
 }
+
+
+char **list_to_array(list_t *head)
+{
+	char **arr;
+	int i;
+
+	arr = malloc(sizeof(*arr) * (list_len(head) + 1));
+	i = 0;
+	while (head != NULL)
+	{
+		arr[i] = strdup(head->str);
+		i = i + 1;
+		head = head->next;
+	}
+	arr[i] = NULL;
+	return(arr);
+}
+
 
 /**
  * string_to_arr - split the user input and make an array of strings, 
@@ -165,38 +186,31 @@ void xfree(void *ptr)
 char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 {
 	char **token_arr;
-	int num_token;
 	int i;
 	char *token;
 	char *path_cmd;
+	list_t *head;
 
-	if (switch_path_on == 1 && cmd == NULL)
+	head = NULL;
+
+	if (switch_on_path == 1 && cmd == NULL)
 	{
 		return(NULL);
 	}
 
-	num_token = count_token(str, delim);
-
-	token_arr = (char **)xmalloc(sizeof(*token_arr) * (num_token + 1));
-	if (token_arr == NULL)
-	{
-		return (NULL);
-	}
 	if (switch_on_path == 0)
 	{
 		i = 0;
 		token = strtok(str, delim);
 		while (token != NULL)
 		{
-			token_arr[i] = token;
+			add_node_end(&head, token);
 			token = strtok(NULL, delim);
 			i = i + 1;
 		}
-		token_arr[i] = NULL;
 	}
 	else if (switch_on_path == 1)
 	{
-		i = 0;
 		token = strtok(str, delim);
 		while (token != NULL)
 		{
@@ -210,13 +224,13 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 			path_cmd = strcat(path_cmd, "/");
 			path_cmd = strcat(path_cmd, cmd);
 
-			token_arr[i] = path_cmd;
+			add_node_end(&head, path_cmd);
+			free(path_cmd);
 			token = strtok(NULL, delim);
-			i = i + 1;
 		}
-		token_arr[i] = NULL;
 	}
-
+	token_arr = list_to_array(head);
+	free_list(head);
 	return (token_arr);
 }
 
