@@ -327,6 +327,73 @@ void create_child(char **cmd_arr)
 }
 
 
+/*build in relative functions begin*/
+typedef struct built_in
+{
+	char *built_in_cmd;
+	void (*fn)(void);
+} built_in_t;
+
+/*exits the shell*/
+void built_in_exit(void)
+{
+	exit(1);
+}
+
+/*prints the current environment*/
+void built_in_env(void)
+{
+	extern char **environ;
+	int i;
+
+	i = 0;
+	while (environ[i] != NULL)
+	{
+		printf("%s\n", environ[i]);
+		i = i + 1;
+	}
+}
+
+/*get the right function to use*/
+void (*get_built_in_fn(char *str))(void)
+{
+    built_in_t built_ins[] = {
+        {"exit", built_in_exit},
+        {"env", built_in_env},
+        {NULL, NULL}
+    };
+	int i;
+
+	i = 0;
+	while (built_ins[i].built_in_cmd != NULL)
+	{
+		if (strcmp(built_ins[i].built_in_cmd, str) == 0)
+		{
+			return (built_ins[i].fn);
+		}
+		i = i + 1;
+	}
+
+    return (NULL);
+}
+
+/*create a built in cmd checker function*/
+int built_in_checker(char **cmd_arr)
+{
+    void (*built_in_fn)(void);
+
+	built_in_fn = get_built_in_fn(cmd_arr[0]);
+	if (built_in_fn == NULL)
+	{
+		return (-1);
+	}
+	built_in_fn();
+	return(0);
+}
+/*build in relative functions end*/
+
+
+
 /**
  * main - entry point
  *
@@ -337,6 +404,7 @@ int main(void)
 	char *buf;
 	char *trimed_buf;
 	char **cmd_arr;
+	int bcmd_checker;
 
 	while (1)
 	{
@@ -348,11 +416,17 @@ int main(void)
 		}
 		trimed_buf = trim_whitespace(buf);
 		cmd_arr = string_to_arr(trimed_buf, " ", NULL, 0);
-		cmd_arr = check_cmd_arr(cmd_arr);
-		if (cmd_arr != NULL)
+
+		/* is the cmd a built in cmd? yes 0, no -1 */
+		bcmd_checker = built_in_checker(cmd_arr);
+		if (bcmd_checker == -1)
 		{
-			create_child(cmd_arr);
-			free_arr(cmd_arr);
+			cmd_arr = check_cmd_arr(cmd_arr);
+			if (cmd_arr != NULL)
+			{
+				create_child(cmd_arr);
+				free_arr(cmd_arr);
+			}
 		}
 		free(buf);
 	}
