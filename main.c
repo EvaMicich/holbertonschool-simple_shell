@@ -6,6 +6,21 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <ctype.h>
+/**
+ *
+ *
+ */
+void free_arr(char **arr)
+{
+    int i;
+
+    for (i = 0; arr[i] != NULL; i++)
+    {
+        free(arr[i]);
+    }
+
+    free(arr);
+}
 
 /**
  * interactive_shell - check if it an interactive or not
@@ -41,10 +56,10 @@ int execute_cmd(char **cmd_arr)
 
 	if (execve(cmd_arr[0], cmd_arr, environ) == -1)
 	{
-		return (-1);
+		perror(cmd_arr[0]);
+		_exit(1);
 	}
 
-	free(cmd_arr);
 	return (0);
 }
 
@@ -123,6 +138,19 @@ int count_token(char *str, char *delim )
 	free(tokenized_str);
 	return (i);
 }
+void *xmalloc(size_t size)
+{
+	void *ptr;
+
+	ptr = malloc(size);
+	printf("malloc return is : %p/n", ptr);
+	return (ptr);
+}
+void xfree(void *ptr)
+{
+	printf("free address: %p", ptr);
+	free(ptr);
+}
 
 /**
  * string_to_arr - split the user input and make an array of strings, 
@@ -142,12 +170,16 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 	char *token;
 	char *path_cmd;
 
+	if (switch_path_on == 1 && cmd == NULL)
+	{
+		return(NULL);
+	}
+
 	num_token = count_token(str, delim);
 
-	token_arr = malloc(sizeof(*token_arr) * (num_token + 1));
+	token_arr = (char **)xmalloc(sizeof(*token_arr) * (num_token + 1));
 	if (token_arr == NULL)
 	{
-		free(token_arr);
 		return (NULL);
 	}
 	if (switch_on_path == 0)
@@ -164,10 +196,6 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 	}
 	else if (switch_on_path == 1)
 	{
-		if (cmd == NULL)
-		{
-			return(NULL);
-		}
 		i = 0;
 		token = strtok(str, delim);
 		while (token != NULL)
@@ -175,7 +203,6 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 			path_cmd = malloc(sizeof(*path_cmd) * (strlen(token) + strlen(cmd) + 2));
 			if (path_cmd == NULL)
 			{
-				free(path_cmd);
 				return (NULL);
 			}
 			path_cmd[0] = '\0';
@@ -203,9 +230,11 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
  **/
 char *find_path(char* cmd)
 {
+
 	char *original_path;
 	char *path;
 	char **path_arr;
+	char *found_path;
 	int i;
 	struct stat st;
 
@@ -217,10 +246,12 @@ char *find_path(char* cmd)
 	{
 		if (stat(path_arr[i], &st) == 0)
 		{
-			return (path_arr[i]);
+			found_path = strdup(path_arr[i]);
+			return(found_path);
 		}
 		i = i + 1;
 	}
+	free_arr(path_arr);
 	return (NULL);
 }
 
@@ -246,6 +277,7 @@ char **check_cmd_arr(char **cmd_arr)
 		{
 			return(NULL);
 		}
+		free(cmd_arr[0]);
 		cmd_arr[0] = path_cmd;
 		return(cmd_arr);
 	}
@@ -295,19 +327,18 @@ int main(void)
 	while (1)
 	{
 		interactive_shell();
-
 		buf = user_getline();
 		if (buf == NULL)
 		{
 			return (0);
 		}
-
 		trimed_buf = trim_whitespace(buf);
 		cmd_arr = string_to_arr(trimed_buf, " ", NULL, 0);
 		cmd_arr = check_cmd_arr(cmd_arr);
 		if (cmd_arr != NULL)
 		{
 			create_child(cmd_arr);
+			free_arr(cmd_arr);
 		}
 		free(buf);
 	}
