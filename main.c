@@ -33,6 +33,10 @@ int main(void)
 				create_child(cmd_arr);
 				free_arr(cmd_arr);
 			}
+			else
+			{
+				fprintf(stderr, "%s: not found\n", buf);
+			}
 		}
 		free(buf);
 	}

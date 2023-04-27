@@ -48,10 +48,13 @@ char *find_path(char *cmd)
 		if (stat(path_arr[i], &st) == 0)
 		{
 			found_path = strdup(path_arr[i]);
+			free(path);
+			free_arr(path_arr);
 			return (found_path);
 		}
 		i = i + 1;
 	}
+	free(path);
 	free_arr(path_arr);
 	return (NULL);
 }
@@ -69,6 +72,7 @@ char **check_cmd_arr(char **cmd_arr)
 
 	if (cmd_arr[0] == NULL)
 	{
+		free_arr(cmd_arr);
 		return (NULL);
 	}
 	exist_in_current = stat(cmd_arr[0], &st);
@@ -81,6 +85,7 @@ char **check_cmd_arr(char **cmd_arr)
 		path_cmd = find_path(cmd_arr[0]);
 		if (path_cmd == NULL)
 		{
+			free_arr(cmd_arr);
 			return (NULL);
 		}
 		free(cmd_arr[0]);

@@ -43,7 +43,7 @@ void (*get_built_in_fn(char *str))(void)
 	int i;
 
 	i = 0;
-	while (built_ins[i].built_in_cmd != NULL)
+	while (built_ins[i].built_in_cmd != NULL && str != 0)
 	{
 		if (strcmp(built_ins[i].built_in_cmd, str) == 0)
 		{
