@@ -337,7 +337,7 @@ typedef struct built_in
 /*exits the shell*/
 void built_in_exit(void)
 {
-	exit(1);
+	_exit(1);
 }
 
 /*prints the current environment*/
