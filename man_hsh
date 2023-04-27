@@ -1,0 +1,55 @@
+_HSH			Holberton School Simple Shell Manual			_HSH
+
+NAME
+	hsh - a simple Unix command interpreter
+
+SYNOPSIS
+
+	hsh
+
+DESCRIPTION
+
+	HSH is a custom shell implementation designed and developed as part of the curriculum at Holberton School and aims to demonstrate the knowledge of Unix system programming, specifically in writing a simple UNIX command interpreter. The Holberton School Simple Shell supports built-in commands, command execution with the $PATH environment variable, redirection, pipes, and basic error handling.
+
+OPTIONS AND ARGUMENTS
+
+	Options and arguments to the hsh command are not supported.
+
+INVOCATION
+
+	Upon launching the hsh, the interpreter initializes and enters an interactive mode, where it reads and processes user commands. When invoked, the shell sets up its environment, including the PATH variable, and automatically sources a configuration file, if present. The shell then displays a prompt and waits for user input. Users can enter commands, which are executed by the shell, and receive appropriate feedback. The shell continues to process commands in this manner until the user exits the shell using the 'exit' built-in command or by sending an interrupt signal (e.g., pressing Ctrl+C). The shell is designed to handle command execution, built-in commands, and basic error handling in a user-friendly manner, providing a seamless command-line experience.
+
+PARAMETERS
+
+	The hsh accepts and processes parameters for built-in and external commands. Parameters are passed to commands as arguments separated by spaces. For built-in commands, the shell interprets the parameters and performs the requested action accordingly. For external commands, the shell passes the parameters to the called program, which then processes them based on its implementation. Special characters are not handled.
+
+EXAMPLES
+
+Interactive mode
+
+#cisfun$ ls -l
+total 6524
+-rwxr-xr-x 1 root root   17944 Apr 25 23:39 hsh
+-rw-r--r-- 1 root root     551 Apr 26 18:13 main.h
+-rw-r--r-- 1 root root    5736 Apr 26 18:48 main.c
+-rw-r--r-- 1 root root    2001 Apr 26 21:27 man_hsh
+-rw-r--r-- 1 root root      27 Apr 23 18:08 README.md
+
+Noninteractive mode
+
+root@a3d4ca9999a3 holbertonschool-simple_shell (master $%=) $ echo "/bin/ls -l" | ./hsh
+total 6524
+-rwxr-xr-x 1 root root   17944 Apr 25 23:39 hsh
+-rw-r--r-- 1 root root     551 Apr 26 18:13 main.h
+-rw-r--r-- 1 root root    5736 Apr 26 18:48 main.c
+-rw-r--r-- 1 root root    2001 Apr 26 21:27 man_hsh
+-rw-r--r-- 1 root root      27 Apr 23 18:08 README.md
+
+AUTHORS
+
+	Belinda Shan and Eva Micich
+
+
+COPYRIGHT
+
+	The version of hsh was created for educational purposes only.
