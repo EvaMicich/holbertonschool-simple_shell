@@ -21,7 +21,7 @@ int main(void)
 			return (0);
 		}
 		trimed_buf = trim_whitespace(buf);
-		cmd_arr = string_to_arr(trimed_buf, " ", NULL, 0);
+		cmd_arr = string_to_arr(trimed_buf, " ");
 
 		/* is the cmd a built in cmd? yes 0, no -1 */
 		bcmd_checker = built_in_checker(cmd_arr);

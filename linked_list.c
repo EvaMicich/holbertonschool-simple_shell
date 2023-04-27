@@ -20,7 +20,7 @@ char **list_to_array(list_t *head)
 		head = head->next;
 	}
 	arr[i] = NULL;
-	return(arr);
+	return (arr);
 }
 
 /**

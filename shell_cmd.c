@@ -74,56 +74,66 @@ char *trim_whitespace(char *str)
  * optional string concat
  * @str: user input
  * @delim: the delimiter
- * @cmd: command to concat onto each element
- * @switch_on_path: 1 turns on command string concat. 0 turns concat off
  * Description - split the user input and make an array of strings
  * Return: an array of tokens
  **/
-char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
+char **string_to_arr(char *str, char *delim)
 {
 	char **token_arr;
 	int i;
+	char *token;
+	list_t *head;
+
+	head = NULL;
+	i = 0;
+	token = strtok(str, delim);
+	while (token != NULL)
+	{
+		add_node_end(&head, token);
+		token = strtok(NULL, delim);
+		i = i + 1;
+	}
+	token_arr = list_to_array(head);
+	free_list(head);
+	return (token_arr);
+}
+
+/**
+ * string_to_concat_arr - split the user input and make an array of strings,
+ * and string concat
+ * @str: user input
+ * @delim: the delimiter
+ * @cmd: command to concat onto each element
+ * Description - split the user input and make an array of strings with concat
+ * Return: an array of tokens
+ **/
+char **string_to_concat_arr(char *str, char *delim, char *cmd)
+{
+	char **token_arr;
 	char *token;
 	char *path_cmd;
 	list_t *head;
 
 	head = NULL;
-
-	if (switch_on_path == 1 && cmd == NULL)
+	if (cmd == NULL)
 	{
 		return (NULL);
 	}
-
-	if (switch_on_path == 0)
+	token = strtok(str, delim);
+	while (token != NULL)
 	{
-		i = 0;
-		token = strtok(str, delim);
-		while (token != NULL)
+		path_cmd = malloc(sizeof(*path_cmd) * (strlen(token) + strlen(cmd) + 2));
+		if (path_cmd == NULL)
 		{
-			add_node_end(&head, token);
-			token = strtok(NULL, delim);
-			i = i + 1;
+			return (NULL);
 		}
-	}
-	else if (switch_on_path == 1)
-	{
-		token = strtok(str, delim);
-		while (token != NULL)
-		{
-			path_cmd = malloc(sizeof(*path_cmd) * (strlen(token) + strlen(cmd) + 2));
-			if (path_cmd == NULL)
-			{
-				return (NULL);
-			}
-			path_cmd[0] = '\0';
-			path_cmd = strcat(path_cmd, token);
-			path_cmd = strcat(path_cmd, "/");
-			path_cmd = strcat(path_cmd, cmd);
-
-			add_node_end(&head, path_cmd);
-			free(path_cmd);
-			token = strtok(NULL, delim);
-		}
+		path_cmd[0] = '\0';
+		path_cmd = strcat(path_cmd, token);
+		path_cmd = strcat(path_cmd, "/");
+		path_cmd = strcat(path_cmd, cmd);
+		add_node_end(&head, path_cmd);
+		free(path_cmd);
+		token = strtok(NULL, delim);
 	}
 	token_arr = list_to_array(head);
 	free_list(head);

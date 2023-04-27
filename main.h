@@ -53,7 +53,8 @@ void free_list(list_t *head);
 void interactive_shell(void);
 char *user_getline(void);
 char *trim_whitespace(char *str);
-char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path);
+char **string_to_arr(char *str, char *delim);
+char **string_to_concat_arr(char *str, char *delim, char *cmd);
 
 /* path_child */
 int execute_cmd(char **cmd_arr);

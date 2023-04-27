@@ -4,21 +4,20 @@ CFLAGS = -Wall -Werror -Wextra -pedantic -std=gnu89 -Wno-format
 
 RM = rm -rf
 
- BETTY = betty $(SRC)
+BETTY = betty $(SRC)
 
- SRC = *.c
+SRC = *.c
 
-NAME = shell
+NAME = hsh
 
 
 
-  all:    1
-
- 1:
+all:
 	$(CC) $(CFLAGS) $(SRC) -o $(NAME)
 
- clean:
+clean:
 	$(RM) *~ \#*\# \.\#* \
 	$(NAME)
 
- re: clean all
+re:
+	clean all

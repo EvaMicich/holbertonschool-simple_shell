@@ -41,7 +41,7 @@ char *find_path(char *cmd)
 
 	original_path = getenv("PATH");
 	path = strdup(original_path);
-	path_arr = string_to_arr(path, ":", cmd, 1);
+	path_arr = string_to_concat_arr(path, ":", cmd);
 	i = 0;
 	while (path_arr[i] != NULL)
 	{
