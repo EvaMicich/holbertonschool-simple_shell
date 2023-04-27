@@ -193,26 +193,6 @@ char **string_to_arr(char *str, char *delim, char *cmd, int switch_on_path)
 	return (token_arr);
 }
 
-char *_getenv(const char *name)
-{
-	extern char **environ;
-	int i;
-	char *token;
-
-	i = 0;
-	while (environ[i] != NULL)
-	{
-		token = strtok(environ[i], "=");
-		if (strcmp(token, name) == 0)
-		{
-			token = strtok(NULL, "=");
-			return (token);
-		}
-		i = i + 1;
-	}
-
-	return (NULL);
-}
 
 /**
  * find_path - find the full path of a command
@@ -223,12 +203,14 @@ char *_getenv(const char *name)
  **/
 char *find_path(char* cmd)
 {
+	char *original_path;
 	char *path;
 	char **path_arr;
 	int i;
 	struct stat st;
 
-	path = _getenv("PATH");
+	original_path = getenv("PATH");
+	path = strdup(original_path);
 	path_arr = string_to_arr(path, ":", cmd, 1);
 	i = 0;
 	while (path_arr[i] != NULL)
@@ -298,22 +280,6 @@ void create_child(char **cmd_arr)
 	}
 }
 
-/**
- *
- *
- */
-void free_arr(char **arr)
-{
-    int i;
-
-    for (i = 0; arr[i] != NULL; i++)
-    {
-        free(arr[i]);
-    }
-
-    free(arr);
-}
-
 
 /**
  * main - entry point
@@ -343,7 +309,6 @@ int main(void)
 		{
 			create_child(cmd_arr);
 		}
-		free_arr(cmd_arr);
 		free(buf);
 	}
 
