@@ -68,10 +68,8 @@ int built_in_checker(char **cmd_arr)
 	built_in_fn = get_built_in_fn(cmd_arr[0]);
 	if (built_in_fn == NULL)
 	{
-		free_arr(cmd_arr);
 		return (-1);
 	}
 	built_in_fn();
-	free_arr(cmd_arr);
 	return (0);
 }

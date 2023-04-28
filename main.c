@@ -2,6 +2,8 @@
 
 /**
  * main - entry point
+ * @ac: the number of arguments
+ * @av: the array of arguments
  *
  * Return: Always 0.
  */
@@ -23,7 +25,6 @@ int main(__attribute__((unused))int ac, char *av[])
 		trimed_buf = trim_whitespace(buf);
 		cmd_arr = string_to_arr(trimed_buf, " ");
 
-		/* is the cmd a built in cmd? yes 0, no -1 */
 		bcmd_checker = built_in_checker(cmd_arr);
 		if (bcmd_checker == -1)
 		{
