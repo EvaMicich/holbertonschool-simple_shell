@@ -5,7 +5,7 @@
  *
  * Return: Always 0.
  */
-int main(void)
+int main(__attribute__((unused))int ac, char *av[])
 {
 	char *buf;
 	char *trimed_buf;
@@ -35,7 +35,8 @@ int main(void)
 			}
 			else
 			{
-				fprintf(stderr, "%s: not found\n", buf);
+				fprintf(stderr, "%s: 1: %s: not found\n", av[0], buf);
+				_exit(127);
 			}
 		}
 		free(buf);
