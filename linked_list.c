@@ -43,7 +43,7 @@ size_t print_list(const list_t *h)
 			h = h->next;
 			counter = counter + 1;
 		}
-		printf("[%i] %s\n", h->len, h->str);
+		printf("%s\n", h->str);
 		h = h->next;
 		counter = counter + 1;
 	}
@@ -90,7 +90,6 @@ list_t *add_node_end(list_t **head, const char *str)
 			return (NULL);
 		}
 		temp->str = strdup(str);
-		temp->len = strlen(str);
 		temp->next = NULL;
 		if (*head == NULL)
 		{
