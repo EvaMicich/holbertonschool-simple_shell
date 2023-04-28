@@ -57,7 +57,7 @@ char **string_to_concat_arr(char *str, char *delim, char *cmd);
 
 /* path_child */
 int execute_cmd(char **cmd_arr);
-char *find_path(char* cmd);
+char *find_path(char *cmd);
 char **check_cmd_arr(char **cmd_arr);
 void create_child(char **cmd_arr);
 

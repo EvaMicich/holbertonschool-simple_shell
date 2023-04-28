@@ -62,7 +62,7 @@ char *find_path(char *cmd)
  * check_cmd_arr - checks that the command is valid, and find path if needed
  * @cmd_arr: array of strings from the
  *
- * return: array on success, NULL on failure
+ * Return: array on success, NULL on failure
  */
 char **check_cmd_arr(char **cmd_arr)
 {
