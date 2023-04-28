@@ -7,7 +7,7 @@
 */
 void built_in_exit(void)
 {
-	_exit(1);
+	_exit(0);
 }
 
 /**
