@@ -34,6 +34,9 @@ int main(__attribute__((unused))int ac, char *av[])
 				create_child(cmd_arr);
 				free_arr(cmd_arr);
 			}
+			else if (trimed_buf[0] == '\0')
+			{
+			}
 			else
 			{
 				fprintf(stderr, "%s: 1: %s: not found\n", av[0], buf);
